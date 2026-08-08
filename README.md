@@ -23,10 +23,11 @@ A simple web app that extracts text from images using Optical Character Recognit
 ```
 IMAGE-TO-TEXT/
 ├── backend/
-│   ├── main.py             # FastAPI server + OCR logic
+│   ├── main.py             # FastAPI server + OCR logic (also serves frontend)
 │   └── requirements.txt    # Python dependencies
-└── frontend/
-    └── index.html          # Web UI
+├── frontend/
+│   └── index.html          # Web UI
+└── start.bat                # One-click start (Windows)
 ```
 
 ## Setup & Installation
@@ -35,8 +36,9 @@ IMAGE-TO-TEXT/
 
 - Python 3.8+
 - [Tesseract OCR](https://github.com/UB-Mannheim/tesseract/wiki) installed on your system
+- (Recommended) [tessdata_best](https://github.com/tesseract-ocr/tessdata_best) `eng.traineddata` for higher accuracy — replace the default file in `Tesseract-OCR/tessdata/`
 
-### Backend Setup
+### Run it
 
 ```bash
 cd backend
@@ -49,11 +51,15 @@ uvicorn main:app --reload --port 8000
 > pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 > ```
 
-The backend will run at `http://localhost:8000`.
+Open your browser and go to **`http://localhost:8000`** — the backend also serves the frontend, so no separate step is needed.
 
-### Frontend Setup
+Windows users can also just double-click `start.bat` to launch the server and open the site automatically.
 
-Just open `frontend/index.html` in your browser — no build step required.
+### Access from your phone (same WiFi)
+
+1. Run the server with: `uvicorn main:app --reload --host 0.0.0.0 --port 8000`
+2. Find your laptop's local IP with `ipconfig` (look for "IPv4 Address")
+3. On your phone's browser, go to `http://<your-ip>:8000`
 
 ## API Endpoints
 
