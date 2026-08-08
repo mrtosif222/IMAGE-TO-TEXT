@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Image to Text (OCR Web App)
 
 A simple web app that extracts text from images using Optical Character Recognition (OCR). Upload an image, click extract, and get clean, copyable text — with confidence score, word count, and processing time.
@@ -88,3 +89,6 @@ Windows users can also just double-click `start.bat` to launch the server and op
 
 **Tosif Rayan**
 [GitHub](https://github.com/mrtosif222)
+=======
+# AI-MEDICINE-CHECKER-USER-MACHINE-LEARNING
+>>>>>>> 5e0bc11124e1021e7aec25e6b216f0c0de1faf5d

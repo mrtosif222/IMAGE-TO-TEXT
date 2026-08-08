@@ -1,5 +1,22 @@
+<<<<<<< HEAD
 fastapi
 uvicorn[standard]
 pillow
 pytesseract
 python-multipart
+=======
+Flask==3.1.1
+gunicorn==26.0.0
+python-dotenv==1.1.0
+openai==1.79.0
+requests==2.32.3
+pydantic==2.11.4
+pytesseract==0.3.13
+Pillow
+scikit-learn
+pandas
+numpy
+joblib==1.4.2
+gTTS==2.5.4
+SpeechRecognition==3.10.4
+>>>>>>> 5e0bc11124e1021e7aec25e6b216f0c0de1faf5d
