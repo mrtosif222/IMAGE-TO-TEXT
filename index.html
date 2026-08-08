@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ImgToText — Image to Text Extractor</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  :root{
+    --bg:#0b0d12; --panel:#12151c; --panel2:#171b24; --border:#242835;
+    --accent:#6c5ce7; --accent2:#00d2b4; --text:#e8e9ee; --muted:#8a8fa3;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:radial-gradient(1200px 600px at 20% -10%, #1a1035, transparent),
+               radial-gradient(1000px 500px at 100% 0%, #062a26, transparent), var(--bg);
+    color:var(--text); font-family:'Segoe UI',system-ui,sans-serif;
+    min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:40px 20px;
+  }
+  header{text-align:center; margin-bottom:36px;}
+  header h1{font-size:2rem; font-weight:700; letter-spacing:-0.5px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; color:transparent;}
+  header p{color:var(--muted); margin-top:6px; font-size:0.95rem;}
+
+  .layout{display:flex; gap:24px; width:100%; max-width:1000px; flex-wrap:wrap;}
+  .panel{background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:24px; flex:1; min-width:320px;}
+
+  .dropzone{
+    border:2px dashed var(--border); border-radius:12px; padding:36px 16px; text-align:center;
+    cursor:pointer; transition:.2s; background:var(--panel2);
+  }
+  .dropzone.drag{border-color:var(--accent); background:#1b1730;}
+  .dropzone svg{width:40px; height:40px; stroke:var(--accent2); margin-bottom:10px;}
+  .dropzone p{color:var(--muted); font-size:0.9rem;}
+  .dropzone p b{color:var(--text);}
+  #fileInput{display:none;}
+
+  #preview{margin-top:16px; display:none; text-align:center;}
+  #preview img{max-width:100%; max-height:260px; border-radius:10px; border:1px solid var(--border);}
+
+  button.primary{
+    margin-top:18px; width:100%; padding:12px; border:none; border-radius:10px; font-weight:600;
+    background:linear-gradient(90deg,var(--accent),var(--accent2)); color:#fff; cursor:pointer; font-size:0.95rem;
+    transition:.2s;
+  }
+  button.primary:disabled{opacity:.5; cursor:not-allowed;}
+  button.primary:not(:disabled):hover{filter:brightness(1.1); transform:translateY(-1px);}
+
+  .stats{display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;}
+  .stat{background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:8px 12px; font-size:0.8rem; color:var(--muted); flex:1; text-align:center;}
+  .stat b{display:block; color:var(--text); font-size:1rem;}
+
+  textarea{
+    width:100%; min-height:280px; background:var(--panel2); border:1px solid var(--border); border-radius:10px;
+    color:var(--text); padding:14px; font-size:0.92rem; resize:vertical; line-height:1.5;
+  }
+  .result-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;}
+  .result-head h3{font-size:1rem;}
+  .copy-btn{background:var(--panel2); border:1px solid var(--border); color:var(--text); padding:6px 12px; border-radius:8px; font-size:0.8rem; cursor:pointer;}
+  .copy-btn:hover{border-color:var(--accent);}
+
+  .empty{color:var(--muted); font-size:0.9rem; text-align:center; margin-top:80px;}
+  .spinner{width:18px; height:18px; border:2px solid #fff4; border-top-color:#fff; border-radius:50%; display:inline-block; animation:spin 0.7s linear infinite; vertical-align:middle; margin-right:8px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .error{color:#ff6b6b; font-size:0.85rem; margin-top:10px; display:none;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>ImgToText</h1>
+  <p>Drag an image, get the text — powered by Tesseract OCR</p>
+</header>
+
+<div class="layout">
+  <div class="panel">
+    <div class="dropzone" id="dropzone">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 3v13m0 0l-4-4m4 4l4-4"/></svg>
+      <p><b>Click to upload</b> or drag & drop</p>
+      <p style="margin-top:4px; font-size:0.75rem;">PNG, JPG, WEBP, BMP</p>
+    </div>
+    <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp,image/bmp">
+    <div id="preview"><img id="previewImg" alt="preview"></div>
+    <button class="primary" id="extractBtn" disabled>Extract Text</button>
+    <div class="error" id="errorBox"></div>
+    <div class="stats" id="stats" style="display:none;">
+      <div class="stat"><b id="statConf">-</b>Confidence %</div>
+      <div class="stat"><b id="statWords">-</b>Words</div>
+      <div class="stat"><b id="statTime">-</b>ms</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="result-head">
+      <h3>Extracted Text</h3>
+      <button class="copy-btn" id="copyBtn">Copy</button>
+    </div>
+    <textarea id="output" placeholder="Extracted text will appear here..." readonly></textarea>
+  </div>
+</div>
+
+<script>
+const API_URL = "http://localhost:8000/api/extract-text";
+
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const preview = document.getElementById('preview');
+const previewImg = document.getElementById('previewImg');
+const extractBtn = document.getElementById('extractBtn');
+const output = document.getElementById('output');
+const errorBox = document.getElementById('errorBox');
+const stats = document.getElementById('stats');
+const copyBtn = document.getElementById('copyBtn');
+
+let selectedFile = null;
+
+dropzone.addEventListener('click', () => fileInput.click());
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
+dropzone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropzone.classList.remove('drag');
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', e => {
+  if (e.target.files.length) handleFile(e.target.files[0]);
+});
+
+function handleFile(file) {
+  selectedFile = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    previewImg.src = e.target.result;
+    preview.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+  extractBtn.disabled = false;
+  errorBox.style.display = 'none';
+}
+
+extractBtn.addEventListener('click', async () => {
+  if (!selectedFile) return;
+  extractBtn.disabled = true;
+  extractBtn.innerHTML = '<span class="spinner"></span>Extracting...';
+  errorBox.style.display = 'none';
+
+  const formData = new FormData();
+  formData.append('file', selectedFile);
+
+  try {
+    const res = await fetch(API_URL, { method: 'POST', body: formData });
+    if (!res.ok) throw new Error((await res.json()).detail || 'Extraction failed');
+    const data = await res.json();
+    output.value = data.text || '(no text found)';
+    document.getElementById('statConf').textContent = data.confidence;
+    document.getElementById('statWords').textContent = data.word_count;
+    document.getElementById('statTime').textContent = data.processing_time_ms;
+    stats.style.display = 'flex';
+  } catch (err) {
+    errorBox.textContent = err.message;
+    errorBox.style.display = 'block';
+  } finally {
+    extractBtn.disabled = false;
+    extractBtn.textContent = 'Extract Text';
+  }
+});
+
+copyBtn.addEventListener('click', () => {
+  if (!output.value) return;
+  navigator.clipboard.writeText(output.value);
+  copyBtn.textContent = 'Copied!';
+  setTimeout(() => copyBtn.textContent = 'Copy', 1200);
+});
+</script>
+</body>
+</html>
