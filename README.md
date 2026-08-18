@@ -91,4 +91,3 @@ Windows users can also just double-click `start.bat` to launch the server and op
 [GitHub](https://github.com/mrtosif222)
 =======
 # AI-MEDICINE-CHECKER-USER-MACHINE-LEARNING
->>>>>>> 5e0bc11124e1021e7aec25e6b216f0c0de1faf5d
