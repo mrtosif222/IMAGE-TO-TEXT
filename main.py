@@ -36,7 +36,7 @@ def preprocess(img: Image.Image) -> Image.Image:
     return img
 
 
-PSM_CANDIDATES = ["--oem 1 --psm 6", "--oem 1 --psm 3", "--oem 1 --psm 4"]
+PSM_CANDIDATES = ["--oem 1 --psm 6"]
 
 
 def best_ocr_result(img: Image.Image):
