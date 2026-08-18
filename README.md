@@ -1,7 +1,8 @@
-<<<<<<< HEAD
 # Image to Text (OCR Web App)
 
 A simple web app that extracts text from images using Optical Character Recognition (OCR). Upload an image, click extract, and get clean, copyable text — with confidence score, word count, and processing time.
+
+**Live:** https://image-to-text-production-16e2.up.railway.app
 
 ## Features
 
@@ -9,7 +10,6 @@ A simple web app that extracts text from images using Optical Character Recognit
 - Live image preview before extraction
 - Text extraction powered by Tesseract OCR
 - Image preprocessing (grayscale, upscaling, denoising, sharpening) for better accuracy
-- Auto-selects the best OCR mode (PSM) per image for higher accuracy
 - Shows confidence %, word count, and processing time
 - One-click copy to clipboard
 - Clean, dark-themed responsive UI
@@ -18,17 +18,17 @@ A simple web app that extracts text from images using Optical Character Recognit
 
 **Backend:** Python, FastAPI, Tesseract OCR (pytesseract), Pillow
 **Frontend:** HTML, CSS, JavaScript (vanilla, no frameworks)
+**Deployment:** Docker, Railway
 
 ## Project Structure
 
 ```
 IMAGE-TO-TEXT/
-├── backend/
-│   ├── main.py             # FastAPI server + OCR logic (also serves frontend)
-│   └── requirements.txt    # Python dependencies
-├── frontend/
-│   └── index.html          # Web UI
-└── start.bat                # One-click start (Windows)
+├── main.py             # FastAPI server + OCR logic (also serves frontend)
+├── requirements.txt    # Python dependencies
+├── index.html           # Web UI
+├── Dockerfile           # Container build for deployment
+└── start.bat             # One-click start (Windows, local dev)
 ```
 
 ## Setup & Installation
@@ -37,20 +37,13 @@ IMAGE-TO-TEXT/
 
 - Python 3.8+
 - [Tesseract OCR](https://github.com/UB-Mannheim/tesseract/wiki) installed on your system
-- (Recommended) [tessdata_best](https://github.com/tesseract-ocr/tessdata_best) `eng.traineddata` for higher accuracy — replace the default file in `Tesseract-OCR/tessdata/`
 
-### Run it
+### Run it locally
 
 ```bash
-cd backend
 pip install -r requirements.txt
 uvicorn main:app --reload --port 8000
 ```
-
-> **Windows users:** If Tesseract isn't in your system PATH, set the path manually in `main.py`:
-> ```python
-> pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-> ```
 
 Open your browser and go to **`http://localhost:8000`** — the backend also serves the frontend, so no separate step is needed.
 
@@ -62,12 +55,21 @@ Windows users can also just double-click `start.bat` to launch the server and op
 2. Find your laptop's local IP with `ipconfig` (look for "IPv4 Address")
 3. On your phone's browser, go to `http://<your-ip>:8000`
 
+### Run with Docker
+
+```bash
+docker build -t image-to-text .
+docker run -p 8000:8000 -e PORT=8000 image-to-text
+```
+
 ## API Endpoints
 
 | Method | Endpoint             | Description                          |
 |--------|-----------------------|---------------------------------------|
 | POST   | `/api/extract-text`   | Upload an image, get extracted text   |
 | GET    | `/api/health`         | Health check                          |
+
+Interactive API docs available at `/docs`.
 
 ### Example Response
 
@@ -85,9 +87,6 @@ Windows users can also just double-click `start.bat` to launch the server and op
 - OCR accuracy typically ranges from 90–96% depending on image quality, font, and resolution.
 - For best results, use clear, high-resolution, well-lit images with minimal skew.
 
-## Author
+### Tosif Rayan [GitHub](https://github.com/mrtosif222)
 
-**Tosif Rayan**
-[GitHub](https://github.com/mrtosif222)
-=======
-# AI-MEDICINE-CHECKER-USER-MACHINE-LEARNING
+![GitHub](https://img.shields.io/badge/GitHub-mrtosif222-181717?style=flat&logo=github)
