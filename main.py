@@ -7,7 +7,7 @@ import io
 import time
 import os
 
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+
 
 app = FastAPI(title="Image to Text API")
 
